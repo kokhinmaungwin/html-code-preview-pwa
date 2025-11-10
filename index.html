@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HTML Code Preview PWA</title>
+
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0f62fe" />
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  pre {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 15px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 300px;
+    overflow-y: auto;
+    user-select: text;
+  }
+  button {
+    margin-right: 10px;
+    padding: 8px 15px;
+    border: none;
+    background: #0f62fe;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+  }
+  button:hover {
+    background: #0b4dcc;
+  }
+</style>
+</head>
+<body>
+
+<h2>HTML Code Preview</h2>
+
+<pre id="codePreview">&lt;h2&gt;Hello World&lt;/h2&gt;</pre>
+
+<div style="margin-top: 15px;">
+  <button id="copyBtn">Select & Copy</button>
+  <button id="clearBtn">Clear</button>
+</div>
+
+<script>
+  // Service Worker register
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+
+  const pre = document.getElementById('codePreview');
+  const copyBtn = document.getElementById('copyBtn');
+  const clearBtn = document.getElementById('clearBtn');
+
+  copyBtn.addEventListener('click', () => {
+    const range = document.createRange();
+    range.selectNodeContents(pre);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    try {
+      document.execCommand('copy');
+      alert('Copied to clipboard!');
+      selection.removeAllRanges();
+    } catch {
+      alert('Copy failed. Try manually selecting.');
+    }
+  });
+
+  clearBtn.addEventListener('click', () => {
+    pre.textContent = '';
+  });
+</script>
+
+</body>
+</html>
