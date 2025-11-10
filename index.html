@@ -12,6 +12,21 @@
   body {
     font-family: Arial, sans-serif;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #f9fafc;
+  }
+  textarea {
+    width: 100%;
+    height: 150px;
+    font-family: monospace;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    resize: vertical;
+    box-sizing: border-box;
   }
   pre {
     background: #f5f5f5;
@@ -19,13 +34,19 @@
     padding: 15px;
     white-space: pre-wrap;
     word-wrap: break-word;
-    max-height: 300px;
+    max-height: 200px;
     overflow-y: auto;
     user-select: text;
+    margin-top: 20px;
+    border-radius: 8px;
+  }
+  .buttons {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
   }
   button {
-    margin-right: 10px;
-    padding: 8px 15px;
+    padding: 10px 18px;
     border: none;
     background: #0f62fe;
     color: white;
@@ -33,50 +54,53 @@
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.2s ease;
+    flex: 1;
   }
   button:hover {
     background: #0b4dcc;
   }
   #installBtn {
-  background: #0f62fe;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s ease;
-}
-#installBtn:hover {
-  background: #0b4dcc;
-}
+    display: none; /* hide initially */
+  }
 </style>
 </head>
 <body>
 
 <h2>HTML Code Preview</h2>
 
+<textarea id="codeInput" placeholder="Type your HTML code here...">&lt;h2&gt;Hello World&lt;/h2&gt;</textarea>
+
 <pre id="codePreview">&lt;h2&gt;Hello World&lt;/h2&gt;</pre>
 
-<div style="margin-top: 15px;">
+<div class="buttons">
   <button id="copyBtn">Select & Copy</button>
   <button id="clearBtn">Clear</button>
-  <button id="installBtn" style="display:none; margin-left:auto;">Install App</button>
+  <button id="installBtn">Install App</button>
 </div>
 
 <script>
-  // Service Worker register
+  // Service Worker registration
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
+    navigator.serviceWorker.register('sw.js').catch(() => {
+      console.log('Service Worker registration failed');
+    });
   }
 
-  const pre = document.getElementById('codePreview');
+  const codeInput = document.getElementById('codeInput');
+  const codePreview = document.getElementById('codePreview');
   const copyBtn = document.getElementById('copyBtn');
   const clearBtn = document.getElementById('clearBtn');
+  const installBtn = document.getElementById('installBtn');
 
+  // Update preview when textarea changes
+  codeInput.addEventListener('input', () => {
+    codePreview.textContent = codeInput.value;
+  });
+
+  // Copy button handler: select & copy preview content
   copyBtn.addEventListener('click', () => {
     const range = document.createRange();
-    range.selectNodeContents(pre);
+    range.selectNodeContents(codePreview);
     const selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(range);
@@ -86,40 +110,44 @@
       alert('Copied to clipboard!');
       selection.removeAllRanges();
     } catch {
-      alert('Copy failed. Try manually selecting.');
+      alert('Copy failed. Please try manually.');
     }
   });
 
+  // Clear button handler: clear textarea and preview
   clearBtn.addEventListener('click', () => {
-    pre.textContent = '';
+    codeInput.value = '';
+    codePreview.textContent = '';
   });
 
+  // PWA install prompt handling
   let deferredPrompt;
-const installBtn = document.getElementById('installBtn');
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = 'inline-block';
-});
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'inline-block';
+  });
 
-installBtn.addEventListener('click', async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const choiceResult = await deferredPrompt.userChoice;
-  if (choiceResult.outcome === 'accepted') {
-    console.log('User accepted the install prompt');
-  } else {
-    console.log('User dismissed the install prompt');
-  }
-  deferredPrompt = null;
-  installBtn.style.display = 'none';
-});
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choiceResult = await deferredPrompt.userChoice;
+    if (choiceResult.outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+  });
 
-// Installed event ကို handle
-window.addEventListener('appinstalled', () => {
-  console.log('PWA installed');
-  installBtn.style.display = 'none';
-});
+  window.addEventListener('appinstalled', () => {
+    console.log('PWA was installed');
+    installBtn.style.display = 'none';
+  });
+
+  // Initialize preview with default textarea content
+  codePreview.textContent = codeInput.value;
 </script>
 
 </body>
