@@ -37,6 +37,19 @@
   button:hover {
     background: #0b4dcc;
   }
+  #installBtn {
+  background: #0f62fe;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+#installBtn:hover {
+  background: #0b4dcc;
+}
 </style>
 </head>
 <body>
@@ -48,6 +61,7 @@
 <div style="margin-top: 15px;">
   <button id="copyBtn">Select & Copy</button>
   <button id="clearBtn">Clear</button>
+  <button id="installBtn" style="display:none; margin-left:auto;">Install App</button>
 </div>
 
 <script>
@@ -79,6 +93,33 @@
   clearBtn.addEventListener('click', () => {
     pre.textContent = '';
   });
+
+  let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'inline-block';
+});
+
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const choiceResult = await deferredPrompt.userChoice;
+  if (choiceResult.outcome === 'accepted') {
+    console.log('User accepted the install prompt');
+  } else {
+    console.log('User dismissed the install prompt');
+  }
+  deferredPrompt = null;
+  installBtn.style.display = 'none';
+});
+
+// Installed event ကို handle
+window.addEventListener('appinstalled', () => {
+  console.log('PWA installed');
+  installBtn.style.display = 'none';
+});
 </script>
 
 </body>
