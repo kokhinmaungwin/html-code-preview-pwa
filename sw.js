@@ -1,16 +1,17 @@
 const CACHE_NAME = 'html-code-preview-pwa-v1';
-const OFFLINE_URL = './';
+const BASE_URL = '/html-code-preview-pwa/';
+const OFFLINE_URL = BASE_URL;
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll([
-        './',
-        './index.html',
-        './manifest.json',
-        './sw.js',
-        './icons/icon-192.png',
-        './icons/icon-512.png',
+        BASE_URL,
+        BASE_URL + 'index.html',
+        BASE_URL + 'manifest.json',
+        BASE_URL + 'sw.js',
+        BASE_URL + 'icons/icon-192.png',
+        BASE_URL + 'icons/icon-512.png',
       ])
     )
   );
